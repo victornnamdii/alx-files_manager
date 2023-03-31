@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import mongodb from 'mongodb';
 
 class DBClient {
@@ -39,4 +38,4 @@ class DBClient {
 
 const dbClient = new DBClient();
 
-module.exports = dbClient;
+export default dbClient;
