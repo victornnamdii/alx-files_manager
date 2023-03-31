@@ -1,5 +1,9 @@
 import sha1 from 'sha1';
+import {
+  ObjectId,
+} from 'mongodb';
 import dbClient from '../utils/db';
+import redisClient from '../utils/redis';
 
 class UsersController {
   static async postNew(req, res) {
@@ -8,10 +12,12 @@ class UsersController {
 
     if (!email) {
       res.status(400).json({ error: 'Missing email' });
+      return;
     }
 
     if (!password) {
       res.status(400).json({ error: 'Missing password' });
+      return;
     }
 
     const { users } = dbClient;
@@ -34,6 +40,35 @@ class UsersController {
       id: insertInfo.insertedId.toString(),
       email,
     });
+  }
+
+  static async getMe(req, res) {
+    const token = req.header('X-Token');
+    if (!token) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+    const key = `auth_${token}`;
+
+    const userId = await redisClient.get(key);
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { users } = dbClient;
+
+    const userDocument = await users.findOne({
+      _id: ObjectId(userId),
+    });
+    if (!userDocument) {
+      res.status(401).json({ error: 'Unauthorized' });
+    } else {
+      res.status(200).json({
+        id: userId,
+        email: userDocument.email,
+      });
+    }
   }
 }
 
