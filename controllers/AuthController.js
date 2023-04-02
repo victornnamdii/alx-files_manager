@@ -24,6 +24,10 @@ class AuthController {
       email,
       password: sha1(password),
     });
+    if (!user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
 
     const token = v4();
     const key = `auth_${token}`;

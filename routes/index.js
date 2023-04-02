@@ -1,6 +1,7 @@
 import AppController from '../controllers/AppController';
 import UsersController from '../controllers/UsersController';
 import AuthController from '../controllers/AuthController';
+import FileController from '../controllers/FilesController';
 
 const router = (app) => {
   /* App Status and stats */
@@ -14,6 +15,9 @@ const router = (app) => {
   /* Authorization */
   app.get('/connect', AuthController.getConnect);
   app.get('/disconnect', AuthController.getDisconnect);
+
+  /* Files */
+  app.post('/files', FileController.postUpload);
 };
 
 export default router;
