@@ -134,7 +134,7 @@ class FileController {
     }
 
     const pageSize = 20;
-    const skip = page * pageSize;
+    const skip = (page - 1) * pageSize;
 
     const relatedFiles = await files.aggregate([
       {
