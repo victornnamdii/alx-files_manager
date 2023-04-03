@@ -5,7 +5,10 @@ import { join } from 'path';
 import {
   v4,
 } from 'uuid';
-import { mkdir, writeFile } from 'fs';
+import {
+  mkdir, writeFile, access, constants,
+} from 'fs';
+import mime from 'mime-types';
 import { promisify } from 'util';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
@@ -237,6 +240,39 @@ class FileController {
       isPublic: newFile.isPublic,
       parentId: newFile.parentId,
     });
+  }
+
+  static async getFile(req, res) {
+    const fileId = req.params.id;
+    const userDocument = await FileController.retrieveUser(req);
+    const userId = userDocument ? userDocument._id.toString() : null;
+    /* if (!userDocument) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    } */
+
+    const { files } = dbClient;
+
+    const file = await files.findOne({
+      _id: ObjectId(fileId),
+    });
+    if (!file || (!file.isPublic && (file.userId.toString() !== userId))) {
+      res.status(404).json({ error: 'Not found' });
+    } else if (file.type === 'folder') {
+      res.status(400).json({ error: 'A folder doesn\'t have content' });
+    } else {
+      const exists = (path) => new Promise((resolve) => {
+        access(path, constants.F_OK, (err) => {
+          resolve(!err);
+        });
+      });
+      if (!(await exists(file.localPath))) {
+        res.status(404).json({ error: 'Not found' });
+      } else {
+        res.set('Content-Type', mime.lookup(file.name));
+        res.status(200).sendFile(file.localPath);
+      }
+    }
   }
 
   static async retrieveUser(req) {
