@@ -166,6 +166,79 @@ class FileController {
     res.status(200).json(filesArray);
   }
 
+  static async putPublish(req, res) {
+    const fileId = req.params.id;
+    const userDocument = await FileController.retrieveUser(req);
+    if (!userDocument) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { files } = dbClient;
+
+    const file = await files.findOne({
+      _id: ObjectId(fileId),
+      userId: ObjectId(userDocument._id.toString()),
+    });
+    if (!file) {
+      res.status(404).json({ error: 'Not found' });
+      return;
+    }
+    await files.update({
+      _id: ObjectId(fileId),
+    }, {
+      $set: { isPublic: true },
+    });
+    const newFile = await files.findOne({
+      _id: ObjectId(fileId),
+    });
+    console.log(newFile);
+    res.status(200).json({
+      id: newFile._id,
+      userId: newFile.userId,
+      name: newFile.name,
+      type: newFile.type,
+      isPublic: newFile.isPublic,
+      parentId: newFile.parentId,
+    });
+  }
+
+  static async putUnpublish(req, res) {
+    const fileId = req.params.id;
+    const userDocument = await FileController.retrieveUser(req);
+    if (!userDocument) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { files } = dbClient;
+
+    const file = await files.findOne({
+      _id: ObjectId(fileId),
+      userId: ObjectId(userDocument._id.toString()),
+    });
+    if (!file) {
+      res.status(404).json({ error: 'Not found' });
+      return;
+    }
+    await files.updateOne({
+      _id: ObjectId(fileId),
+    }, {
+      $set: { isPublic: false },
+    });
+    const newFile = await files.findOne({
+      _id: ObjectId(fileId),
+    });
+    res.status(200).json({
+      id: newFile._id.toString(),
+      userId: newFile.userId,
+      name: newFile.name,
+      type: newFile.type,
+      isPublic: newFile.isPublic,
+      parentId: newFile.parentId,
+    });
+  }
+
   static async retrieveUser(req) {
     const token = req.header('X-Token');
     if (!token) {

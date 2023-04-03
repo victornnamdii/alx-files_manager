@@ -20,6 +20,8 @@ const router = (app) => {
   app.post('/files', FileController.postUpload);
   app.get('/files/:id', FileController.getShow);
   app.get('/files', FileController.getIndex);
+  app.put('/files/:id/publish', FileController.putPublish);
+  app.put('/files/:id/unpublish', FileController.putUnpublish);
 };
 
 export default router;
