@@ -123,26 +123,23 @@ class FileController {
     } = req.query;
     const { files } = dbClient;
 
+    const pageSize = 20;
+    const pageNumber = page || 1;
+    const skip = (pageNumber - 1) * pageSize;
+
     let query;
-    if (parentId) {
+    if (!parentId) {
       query = {
         userId: ObjectId(userDocument._id.toString()),
-        parentId: ObjectId(parentId),
       };
     } else {
       query = {
         userId: ObjectId(userDocument._id.toString()),
+        parentId: ObjectId(parentId),
       };
     }
 
-    const pageSize = 20;
-    const pageNumber = page || 1;
-    let skip = (pageNumber - 1) * pageSize;
-    if (skip < 0) {
-      skip = 0;
-    }
-
-    const relatedFiles = await files.aggregate([
+    const result = await files.aggregate([
       {
         $match: query,
       },
@@ -154,19 +151,16 @@ class FileController {
       },
     ]).toArray();
 
-    const filesArray = relatedFiles.map((file) => {
-      const fixFile = {
+    const finalResult = result.map((file) => {
+      const newFile = {
+        ...file,
         id: file._id,
-        userId: file.userId,
-        name: file.name,
-        type: file.type,
-        isPublic: file.isPublic,
-        parentId: file.parentId,
       };
-      return fixFile;
+      delete newFile._id;
+      delete newFile.localPath;
+      return newFile;
     });
-
-    res.status(200).json(filesArray);
+    res.status(200).send(finalResult);
   }
 
   static async retrieveUser(req) {
