@@ -117,15 +117,15 @@ class FileController {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
-    const parentId = req.query && req.query.parentId ? req.query.parentId : false;
+    const parentId = req.query && req.query.parentId ? req.query.parentId : 0;
     const page = req.query && req.query.page ? Number.parseInt(req.query.page, 10) : 1;
     const { files } = dbClient;
 
     let query;
-    if (parentId) {
+    if (parentId !== 0) {
       query = {
         userId: ObjectId(userDocument._id.toString()),
-        parentId: (parentId === 0 || parentId === '0') ? parentId : ObjectId(parentId),
+        parentId: ObjectId(parentId),
       };
     } else {
       query = {
