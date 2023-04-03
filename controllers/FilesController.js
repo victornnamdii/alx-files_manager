@@ -9,9 +9,12 @@ import {
   mkdir, writeFile, access, constants,
 } from 'fs';
 import mime from 'mime-types';
+import Queue from 'bull/lib/queue';
 import { promisify } from 'util';
 import redisClient from '../utils/redis';
 import dbClient from '../utils/db';
+
+const fileQueue = new Queue('thumbnail generation');
 
 class FileController {
   static async postUpload(req, res) {
@@ -76,6 +79,11 @@ class FileController {
     }
     const insertInfo = await files.insertOne(newFile);
     const fileId = insertInfo.insertedId.toString();
+
+    if (type === 'image') {
+      const jobName = `Image thumbnail [${userDocument._id.toString()}-${fileId}]`;
+      fileQueue.add({ userId: userDocument._id.toString(), fileId, name: jobName });
+    }
     res.status(201).json({
       id: fileId,
       userId: userDocument._id.toString(),
@@ -246,6 +254,7 @@ class FileController {
     const fileId = req.params.id;
     const userDocument = await FileController.retrieveUser(req);
     const userId = userDocument ? userDocument._id.toString() : null;
+    const { size } = req.query;
     /* if (!userDocument) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
@@ -266,7 +275,8 @@ class FileController {
           resolve(!err);
         });
       });
-      if (!(await exists(file.localPath))) {
+      const path = size && file.type === 'image' ? `${file.localPath}_${size}` : file.localPath;
+      if (!(await exists(path))) {
         res.status(404).json({ error: 'Not found' });
       } else {
         res.set('Content-Type', mime.lookup(file.name));
