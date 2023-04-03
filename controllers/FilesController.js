@@ -117,12 +117,14 @@ class FileController {
       res.status(401).json({ error: 'Unauthorized' });
       return;
     }
-    const parentId = req.query && req.query.parentId ? req.query.parentId : 0;
-    const page = req.query && req.query.page ? Number.parseInt(req.query.page, 10) : 1;
+    const {
+      parentId,
+      page,
+    } = req.query;
     const { files } = dbClient;
 
     let query;
-    if (parentId !== 0) {
+    if (parentId) {
       query = {
         userId: ObjectId(userDocument._id.toString()),
         parentId: ObjectId(parentId),
@@ -134,7 +136,8 @@ class FileController {
     }
 
     const pageSize = 20;
-    const skip = (page - 1) * pageSize;
+    const pageNumber = page || 1;
+    const skip = (pageNumber - 1) * pageSize;
 
     const relatedFiles = await files.aggregate([
       {
