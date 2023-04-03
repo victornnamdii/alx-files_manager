@@ -137,7 +137,10 @@ class FileController {
 
     const pageSize = 20;
     const pageNumber = page || 1;
-    const skip = (pageNumber - 1) * pageSize;
+    let skip = (pageNumber - 1) * pageSize;
+    if (skip < 0) {
+      skip = 0;
+    }
 
     const relatedFiles = await files.aggregate([
       {
