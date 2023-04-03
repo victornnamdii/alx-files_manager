@@ -121,7 +121,7 @@ class FileController {
     const page = req.query.page || 0;
     const { files } = dbClient;
 
-    /* let query;
+    let query;
     if (parentId) {
       query = {
         userId: ObjectId(userDocument._id.toString()),
@@ -131,12 +131,7 @@ class FileController {
       query = {
         userId: ObjectId(userDocument._id.toString()),
       };
-    } */
-
-    const query = {
-      userId: ObjectId(userDocument._id.toString()),
-      parentId: (parentId === 0 || parentId === '0') ? parentId : ObjectId(parentId),
-    };
+    }
 
     const pageSize = 20;
     const skip = Number.parseInt(page, 10) * pageSize;
