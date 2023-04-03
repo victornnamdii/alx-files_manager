@@ -118,9 +118,7 @@ class FileController {
       return;
     }
     const parentId = req.query.parentId || 0;
-    const page = /\d+/.test((req.query.page || '').toString())
-      ? Number.parseInt(req.query.page, 10)
-      : 0;
+    const page = req.query.page || 0;
     const { files } = dbClient;
 
     /* let query;
@@ -137,12 +135,11 @@ class FileController {
 
     const query = {
       userId: ObjectId(userDocument._id.toString()),
-      parentId: parentId === 0 ? parentId : ObjectId(parentId),
+      parentId: (parentId === 0 || parentId === '0') ? parentId : ObjectId(parentId),
     };
 
     const pageSize = 20;
-    const pageNumber = page || 1;
-    const skip = pageNumber * pageSize;
+    const skip = Number.parseInt(page, 10) * pageSize;
 
     const relatedFiles = await files.aggregate([
       {
