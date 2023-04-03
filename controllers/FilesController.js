@@ -12,25 +12,7 @@ import dbClient from '../utils/db';
 
 class FileController {
   static async postUpload(req, res) {
-    const token = req.header('X-Token');
-    if (!token) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-
-    const key = `auth_${token}`;
-
-    const userId = await redisClient.get(key);
-    if (!userId) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-
-    const { users } = dbClient;
-
-    const userDocument = await users.findOne({
-      _id: ObjectId(userId),
-    });
+    const userDocument = await FileController.retrieveUser(req);
     if (!userDocument) {
       res.status(401).json({ error: 'Unauthorized' });
       return;
@@ -93,12 +75,116 @@ class FileController {
     const fileId = insertInfo.insertedId.toString();
     res.status(201).json({
       id: fileId,
-      userId,
+      userId: userDocument._id.toString(),
       name,
       type,
       isPublic,
       parentId,
     });
+  }
+
+  static async getShow(req, res) {
+    const fileId = req.params.id;
+    const userDocument = await FileController.retrieveUser(req);
+    if (!userDocument) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+
+    const { files } = dbClient;
+
+    const file = await files.findOne({
+      _id: ObjectId(fileId),
+      userId: ObjectId(userDocument._id.toString()),
+    });
+    if (!file) {
+      res.status(404).json({ error: 'Not found' });
+    } else {
+      res.status(200).json({
+        id: fileId,
+        userId: userDocument._id.toString(),
+        name: file.name,
+        type: file.type,
+        isPublic: file.isPublic,
+        parentId: file.parentId,
+      });
+    }
+  }
+
+  static async getIndex(req, res) {
+    const userDocument = await FileController.retrieveUser(req);
+    if (!userDocument) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+    const parentId = req.query && req.query.parentId ? req.query.parentId : 0;
+    const page = req.query && req.query.page ? req.query.page : 1;
+    const { files } = dbClient;
+
+    let query;
+    if (parentId !== 0) {
+      query = {
+        userId: ObjectId(userDocument._id.toString()),
+        parentId: ObjectId(parentId),
+      };
+    } else {
+      query = {
+        userId: ObjectId(userDocument._id.toString()),
+      };
+    }
+
+    const pageSize = 20;
+    const skip = (page - 1) * pageSize;
+
+    const relatedFiles = await files.aggregate([
+      {
+        $match: query,
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: pageSize,
+      },
+    ]).toArray();
+
+    const filesArray = relatedFiles.map((file) => {
+      const fixFile = {
+        id: file._id,
+        userId: file.userId,
+        name: file.name,
+        type: file.type,
+        isPublic: file.isPublic,
+        parentId: file.parentId,
+      };
+      return fixFile;
+    });
+
+    res.status(200).json(filesArray);
+  }
+
+  static async retrieveUser(req) {
+    const token = req.header('X-Token');
+    if (!token) {
+      return null;
+    }
+
+    const key = `auth_${token}`;
+
+    const userId = await redisClient.get(key);
+    if (!userId) {
+      return null;
+    }
+
+    const { users } = dbClient;
+
+    const userDocument = await users.findOne({
+      _id: ObjectId(userId),
+    });
+    if (!userDocument) {
+      return null;
+    }
+    return userDocument;
   }
 }
 

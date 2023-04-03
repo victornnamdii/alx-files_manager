@@ -18,6 +18,8 @@ const router = (app) => {
 
   /* Files */
   app.post('/files', FileController.postUpload);
+  app.get('/files/:id', FileController.getShow);
+  app.get('/files', FileController.getIndex);
 };
 
 export default router;
