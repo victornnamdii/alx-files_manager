@@ -7,6 +7,7 @@ import {
 import dbClient from './utils/db';
 
 const fileQueue = new Queue('thumbnail generation');
+const userQueue = new Queue('email');
 
 const generateThumbnails = async (width, localPath) => {
   const thumbnail = await imageThumbnail(localPath, {
@@ -42,4 +43,21 @@ fileQueue.process(async (job, done) => {
   await fs.promises.writeFile(localPath500, thumbnail500);
   await fs.promises.writeFile(localPath250, thumbnail250);
   await fs.promises.writeFile(localPath100, thumbnail100);
+});
+
+userQueue.process(async (job, done) => {
+  const { userId } = job.data;
+  if (!userId) {
+    done(new Error('Missing userId'));
+  }
+
+  const { users } = dbClient;
+
+  const user = users.findOne({
+    _id: ObjectId(userId),
+  });
+  if (!user) {
+    done(new Error('User not found'));
+  }
+  console.log(`Welcome ${user.email}`);
 });
