@@ -359,7 +359,7 @@ The users's authentication token should be passed inside the header `X-Token` al
 
 The query parameters are optional, but they help return a more specific result.
 
-`size`: can be `500`, `250`, or `100`. Indicates which size of the image being requested will be returned.
+* `size`: can be `500`, `250`, or `100`. Indicates which size of the image being requested will be returned.
 
 ```bash
 curl -XPUT 0.0.0.0:5000/files/5f1e879ec7ba06511e683b22/publish -H "X-Token: f21fb953-16f9-46ed-8d9c-84c6450ec80f" ; echo ""
