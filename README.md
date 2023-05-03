@@ -31,7 +31,7 @@ A simple file management API built with Express, MongoDB, Redis, Bull, and Node.
 
 ## Installation
 
-* Clone this repository: `git clone "https://github.com/victornnamdii/alx-files-manager"`.
+* Clone this repository: `git clone "https://github.com/victornnamdii/alx-files_manager"`.
 * Access the directory: `cd alx-files-manager`.
 * Install the packages: `npm install`.
 
