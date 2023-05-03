@@ -66,10 +66,12 @@ curl 0.0.0.0:5000/status ; echo ""
 {"redis":true,"db":true}
 ```
 
-`redis` shows status of the redis server.
-`db` shows the status of the MongoDB client.
-`true` shows it is connected and `false` means it is not connected.
+* `redis` shows status of the redis server.
+* `db` shows the status of the MongoDB client.
+* `true` shows it is connected and `false` means it is not connected.
 **Status code: 200**
+
+- - - -
 
 ### `GET /stats`
 
@@ -81,9 +83,11 @@ curl 0.0.0.0:5000/stats ; echo ""
 {"users":4,"files":30}
 ```
 
-`users` shows the number of users in the database.
-`files` shows the total number of files in the database.
+* `users` shows the number of users in the database.
+* `files` shows the total number of files in the database.
 **Status code: 200**
+
+- - - -
 
 ### `POST /users`
 
@@ -109,10 +113,12 @@ curl 0.0.0.0:5000/users -XPOST -H "Content-Type: application/json" -d '{ "email"
 
 #### Error Messages
 
-`Already exist`: Email already exists.
-`Missing email`: Email wasn't specified along with request.
-`Missing password`: Password wasn't specified along with request.
+* `Already exist`: Email already exists.
+* `Missing email`: Email wasn't specified along with request.
+* `Missing password`: Password wasn't specified along with request.
 **Status code: 400**
+
+- - - -
 
 ### `GET /connect`
 
@@ -125,14 +131,16 @@ curl 0.0.0.0:5000/connect -H "Authorization: Basic Ym9iQGR5bGFuLmNvbTp0b3RvMTIzN
 {"token":"031bffac-3edc-4e51-aaae-1c121317da8a"}
 ```
 
-> This token is active for only 24 hoours.
+> This token is active for only 24 hours.
 
 The user's `email` and `password` should be passed in a header `Authorization` with the format `Basic [Base64 of email:password]`. Example: `Basic Ym9iQGR5bGFuLmNvbTp0b3RvMTIzNCE=` where `Ym9iQGR5bGFuLmNvbTp0b3RvMTIzNCE=` is the base64 of `bob@dylan.com:toto1234!`
 
 #### Error Messages
 
-`Unauthorized`: The user details were incorrect
+* `Unauthorized`: The user details were incorrect
 **Status code: 401**
+
+- - - -
 
 ### `GET /disconnect`
 
@@ -143,8 +151,10 @@ The users's authentication token should be passed inside the header `X-Token` al
 
 #### Error Messages
 
-`Unauthorized`: The authentication token was invalid.
+* `Unauthorized`: The authentication token was invalid.
 **Status code: 401**
+
+- - - -
 
 ### `GET /users/me`
 
@@ -161,8 +171,10 @@ The users's authentication token should be passed inside the header `X-Token` al
 
 #### Error Messages
 
-`Unauthorized`: The authentication token was invalid
+* `Unauthorized`: The authentication token was invalid
 **Status code: 401**
+
+- - - -
 
 ### `POST /files`
 
@@ -173,11 +185,11 @@ The users's authentication token should be passed inside the header `X-Token` al
 
 #### Parameters to pass
 
-`name`: File name
-`type`: File type (either `folder`, `file`, or `image`)
-`parentId` (optional): ID of the parent (default: 0 -> root)
-`isPublic` (optional): as boolean to define if the file is public or not (default: false)
-`data` (only for type=file|image): as Base64 of the file content
+* `name`: File name
+* `type`: File type (either `folder`, `file`, or `image`)
+* `parentId` (optional): ID of the parent (default: 0 -> root)
+* `isPublic` (optional): as boolean to define if the file is public or not (default: false)
+* `data` (only for type=file|image): as Base64 of the file content
 
 All files will be stored locally in the path specified in the environment variable `FOLDER_PATH` and files stored locally are stored using a UUID for the filename.
 
@@ -199,15 +211,17 @@ Hello Webstack!
 
 #### Error Messages
 
-`Unauthorized`: The authentication token was invalid
+* `Unauthorized`: The authentication token was invalid
 **Status code: 401**
 
-`Missing name`: `name` was not specified along with request.
-`Missing type`: `type` was not specified along with request.
-`Missing data`: `data` was not specified along with request and `type` is not `folder`
-`Parent not found`: `parentId` specified is invalid
-`Parent is not a folder`: `parentId` specified is not for a `folder` type.
+* `Missing name`: `name` was not specified along with request.
+* `Missing type`: `type` was not specified along with request.
+* `Missing data`: `data` was not specified along with request and `type` is not `folder`
+* `Parent not found`: `parentId` specified is invalid
+* `Parent is not a folder`: `parentId` specified is not for a `folder` type.
 **Status code: 400**
+
+- - - -
 
 ### `GET /files/:id`
 
@@ -224,11 +238,13 @@ curl -XGET 0.0.0.0:5000/files/5f1e8896c7ba06511e683b25 -H "X-Token: f21fb953-16f
 
 #### Error Messages
 
-`Unauthorized`: The authentication token was invalid.
+* `Unauthorized`: The authentication token was invalid.
 **Status code: 401**
 
-`Not found`: No file linked to the user and the ID passed.
+* `Not found`: No file linked to the user and the ID passed.
 **Status code: 404**
+
+- - - -
 
 ### `GET /files`
 
@@ -256,8 +272,10 @@ curl -XGET 0.0.0.0:5000/files?parentId=5f1e881cc7ba06511e683b23 -H "X-Token: f21
 
 #### Error Messages
 
-`Unauthorized`: The authentication token was invalid.
+* `Unauthorized`: The authentication token was invalid.
 **Status code: 401**
+
+- - - -
 
 ### `PUT /files/:id/publish`
 
@@ -278,11 +296,13 @@ curl -XPUT 0.0.0.0:5000/files/5f1e8896c7ba06511e683b25/publish -H "X-Token: f21f
 
 #### Error Messages
 
-`Unauthorized`: The authentication token was invalid.
+* `Unauthorized`: The authentication token was invalid.
 **Status code: 401**
 
-`Not found`: No file linked to the user and the ID passed.
+* `Not found`: No file linked to the user and the ID passed.
 **Status code: 404**
+
+- - - -
 
 ### `PUT /files/:id/unpublish`
 
@@ -303,11 +323,13 @@ curl -XPUT 0.0.0.0:5000/files/5f1e8896c7ba06511e683b25/publish -H "X-Token: f21f
 
 #### Error Messages
 
-`Unauthorized`: The authentication token was invalid.
+* `Unauthorized`: The authentication token was invalid.
 **Status code: 401**
 
-`Not found`: No file linked to the user and the ID passed.
+* `Not found`: No file linked to the user and the ID passed.
 **Status code: 404**
+
+- - - -
 
 ### `GET /files/:id/data`
 
@@ -346,11 +368,11 @@ new_image.png: PNG image data, 100 x 109, 8-bit/color RGBA, non-interlaced
 
 #### Error Messages
 
-`Unauthorized`: The authentication token was invalid.
+* `Unauthorized`: The authentication token was invalid.
 **Status code: 401**
 
-`Not found`: No file linked to the user and the ID passed.
+* `Not found`: No file linked to the user and the ID passed.
 **Status code: 404**
 
-`A folder doesn't have content`: ID is linked to a folder
+* `A folder doesn't have content`: ID is linked to a folder
 **Status code: 400**
